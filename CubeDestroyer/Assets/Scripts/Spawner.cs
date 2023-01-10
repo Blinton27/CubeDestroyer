@@ -17,94 +17,88 @@ public class Spawner : MonoBehaviour
     [SerializeField] private float timerToSpawnPrefab = 1f;
     [SerializeField] private float distanceFromCamToSpawn = 30f; 
 
-    private List<GameObject> _myGameObjectList = new List<GameObject>();
+    private List<GameObject> disabledCubePool = new List<GameObject>();
+    [SerializeField] private int poolCount = 5; 
     
+    private float time;
     void Start()
     {
-        SpawnCube();
+        time = 0f;
+        SpawnCubesForPool(poolCount);
     }
 
-    
-    
-    
-    
-    bool isPressed =false;
-   
-   
-   
-   
+  
     void Update()
     {
-       if (Input.GetKey("space") && !isPressed)
-       {
-            isPressed= true;
-            FindingMyInstantiatedObjectsToActivateThem();
-       }
+        time += Time.deltaTime;
+
+        if (time >= timerToSpawnPrefab)
+        {
+            time = 0f;
+
+            // Si j'ai pas de cube à spawn j'attends le prochain cycle
+            if (disabledCubePool.Count == 0) return;
+
+            // Sinon on récupère un cube de la pool (le premier de la liste)
+            GameObject cubeToEnable = disabledCubePool[0];
+            
+            // On le place aléatoirement 
+            cubeToEnable.transform.position = ComputeRandomPosition();
+            
+            // On le retire de la pool
+            disabledCubePool.RemoveAt(0);
+            
+            // Et on l'active
+            cubeToEnable.SetActive(true);
+        }
+
     }
 
    
-    void SpawnCube()
+    void SpawnCubesForPool(int numberOfCubes)
     {
         // pour faire spawn 5 items 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < numberOfCubes; i++)
         {
-            //l'endroit où on vas l'instancier donc on set up ses positions
-            float positionY = Random.Range(0,Screen.height);
-            float positionX = Random.Range(0, Screen.width);
-            float positionZ = Random.Range(0, distanceFromCamToSpawn);
+            GameObject monObjet = SpawnCube();
             
-            // & ici on fais en sorte que ça spawn dans le champ vision de la caméra
-            Vector3 worldPosition = Camera.main.ScreenToWorldPoint(new Vector3(positionX, positionY, positionZ));
+            // Méthode 2 (voir PoolSignal.cs pour la méthode 1)
+            monObjet.GetComponent<PoolSignal>().spawner = this;
 
-            //on crée l'objet
-            GameObject monObjet = Instantiate(cubePrefab, worldPosition, Quaternion.identity);
             //on désactive l'objet
             monObjet.SetActive(false);
-
-            //on ajoute nos objets à la liste
-            _myGameObjectList.Add(monObjet);
         }
     }
 
-    private void FindingMyInstantiatedObjectsToActivateThem()
+    private GameObject SpawnCube()
     {
-        foreach (GameObject item in _myGameObjectList)
-        {
-            item.SetActive(true);
-            float speed = Random.Range(10,50);
-            //on vas déplacer les objets vers la cam avec le AddForce
-            item.GetComponent<Rigidbody>().AddForce(-Camera.main.transform.forward * speed);
+        Vector3 worldPosition = ComputeRandomPosition();
 
-            //On peux faire la même chose avec la velocity
-            //item.GetComponent<Rigidbody>().velocity = -Camera.main.transform.forward * speed;
-        }
+        //Autre façon de faire
+        //Vector3 worldPosition = Camera.main.ViewportToWorldPoint(new Vector3(Random.value, Random.value, positionZ));
+
+        //on crée l'objet
+        GameObject monObjet = Instantiate(cubePrefab, worldPosition, Quaternion.identity);
+        return monObjet;
     }
 
+    private Vector3 ComputeRandomPosition()
+    {
+        //l'endroit où on vas l'instancier donc on set up ses positions
+        float positionY = Random.Range(0, Screen.height);
+        float positionX = Random.Range(0, Screen.width);
+        float positionZ = distanceFromCamToSpawn;
+
+        // & ici on fais en sorte que ça spawn dans le champ vision de la caméra
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(new Vector3(positionX, positionY, positionZ));
+        return worldPosition;
+    }
+
+    // Cette fonction est appelée par PoolSignal lorsque le cube est désactivé
+    public void AddToPool(GameObject objectToAdd)
+    {
+        disabledCubePool.Add(objectToAdd);
+    }
    
 #endregion    
-#region Step 2 ChatGPT
-    // [SerializeField] private GameObject cubePrefab; // Référence au prefab du cube
-    // [SerializeField] private float spawnDistance = 30.0f; // Distance à laquelle les cubes apparaissent par rapport à la caméra
-    // [SerializeField] private float spawnInterval = 1.0f; // Intervalle de temps entre chaque apparition de cube
-
-    // // Start is called before the first frame update
-    // void Start()
-    // {
-    //     // Appelle la fonction SpawnCube toutes les "spawnInterval" secondes
-    //     InvokeRepeating("SpawnCube", 0.0f, spawnInterval);
-    // }
-
-    // void SpawnCube()
-    // {
-    //     // Génère des coordonnées x,y aléatoires dans le champ de vision de l'utilisateur
-    //     float x = Random.Range(-1.0f, 1.0f) * Camera.main.orthographicSize * Screen.width / Screen.height;
-    //     float y = Random.Range(-1.0f, 1.0f) * Camera.main.orthographicSize;
-
-    //     // Crée un nouveau cube à la position de la caméra avec une rotation aléatoire
-    //     GameObject cube = Instantiate(cubePrefab, transform.position + transform.forward * spawnDistance, Quaternion.Euler(0, Random.Range(0, 360), 0));
-
-    //     // Déplace le cube vers les coordonnées x,y générées aléatoirement
-    //     cube.transform.position = new Vector3(x, y, cube.transform.position.z);
-    // }
-#endregion
 }
