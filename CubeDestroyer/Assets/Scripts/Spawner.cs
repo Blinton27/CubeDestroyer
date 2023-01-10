@@ -82,29 +82,4 @@ public class Spawner : MonoBehaviour
 
    
 #endregion    
-#region Step 2 ChatGPT
-    // [SerializeField] private GameObject cubePrefab; // Référence au prefab du cube
-    // [SerializeField] private float spawnDistance = 30.0f; // Distance à laquelle les cubes apparaissent par rapport à la caméra
-    // [SerializeField] private float spawnInterval = 1.0f; // Intervalle de temps entre chaque apparition de cube
-
-    // // Start is called before the first frame update
-    // void Start()
-    // {
-    //     // Appelle la fonction SpawnCube toutes les "spawnInterval" secondes
-    //     InvokeRepeating("SpawnCube", 0.0f, spawnInterval);
-    // }
-
-    // void SpawnCube()
-    // {
-    //     // Génère des coordonnées x,y aléatoires dans le champ de vision de l'utilisateur
-    //     float x = Random.Range(-1.0f, 1.0f) * Camera.main.orthographicSize * Screen.width / Screen.height;
-    //     float y = Random.Range(-1.0f, 1.0f) * Camera.main.orthographicSize;
-
-    //     // Crée un nouveau cube à la position de la caméra avec une rotation aléatoire
-    //     GameObject cube = Instantiate(cubePrefab, transform.position + transform.forward * spawnDistance, Quaternion.Euler(0, Random.Range(0, 360), 0));
-
-    //     // Déplace le cube vers les coordonnées x,y générées aléatoirement
-    //     cube.transform.position = new Vector3(x, y, cube.transform.position.z);
-    // }
-#endregion
 }
